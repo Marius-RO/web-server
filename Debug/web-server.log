@@ -1,8 +1,0 @@
-﻿  main.cpp
-D:\IT\Proiecte\C ~ C++\web-server\main.cpp(7,1): warning C4326: return type of 'main' should be 'int' instead of 'void'
-  MultiClientChat.cpp
-  TcpListener.cpp
-D:\IT\Proiecte\C ~ C++\web-server\TcpListener.cpp(163,20): warning C4018: '<': signed/unsigned mismatch
-  WebServer.cpp
-  Generating Code...
-  web-server.vcxproj -> D:\IT\Proiecte\C ~ C++\web-server\Debug\web-server.exe

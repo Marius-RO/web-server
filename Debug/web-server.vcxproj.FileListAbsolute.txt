@@ -1,2 +1,0 @@
-D:\IT\Proiecte\C ~ C++\web-server\Debug\web-server.exe
-D:\IT\Proiecte\C ~ C++\web-server\Debug\web-server.pdb
