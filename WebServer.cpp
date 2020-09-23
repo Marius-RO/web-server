@@ -7,15 +7,17 @@
 #include <vector>
 #include "WebServer.h"
 
-void WebServer::onClientConected(int clientSocket) {
+void WebServer::onClientConected(SOCKET clientSocket) {}
 
+void WebServer::onClientDisconected(SOCKET clientSocket) {}
+
+void WebServer::sendMessageToClient(SOCKET clientSocket, const char* message, int length) {
+	send(clientSocket, message, length,0);
 }
 
-void WebServer::onClientDisconected(int clientSocket) {
+void WebServer::broadcastMessageToClients(SOCKET sendingClientSocket, const char* message, int length){}
 
-}
-
-void WebServer::onMessageReceived(int clientSocket, const char* msg, int length) {
+void WebServer::onMessageReceived(SOCKET clientSocket, const char* msg, int length) {
 	
 	// GET /index.html HTTP/1.1
 
@@ -58,6 +60,8 @@ void WebServer::onMessageReceived(int clientSocket, const char* msg, int length)
 	std::string output = oss.str();
 	int size = output.size() + 1;
 
-	sendToClient(clientSocket, output.c_str(), size);
+	sendMessageToClient(clientSocket, output.c_str(), size);
 
 }
+
+int WebServer::shutdown() { return TcpListener::shutdown(); }

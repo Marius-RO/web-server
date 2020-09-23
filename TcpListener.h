@@ -1,40 +1,39 @@
 #pragma once
+#include "Utilities.h"
 #include <WS2tcpip.h>
 
 #pragma comment (lib, "ws2_32.lib")
 
-class TcpListener {
+class TcpListener { 
 
-public:
-	TcpListener(const char* ipAdress, int port):m_ipAdress(ipAdress), m_port(port){}
+	private:
+		const char*		serverIpAdress;			// IP adress server will run on
+		const char*		serverPort;				// port number for tcp socket
+		SOCKET			serverListeningSocket;	// internal socket file descriptor for the listening socket
+		fd_set			master_fd;				// master file descriptor set
+		WSADATA			wsaData;				// Winsock
 
-	// Initialize the listener
-	int init();
+	protected:
+		bool			serverIsRunning = true;	// server will be on until running will be set to false
 
-	// Run the listener
-	int run();
+		virtual void onClientConected(SOCKET clientSocket) = 0;
+		virtual void onClientDisconected(SOCKET clientSocket) = 0;
+		virtual void onMessageReceived(SOCKET clientSocket, const char* message, int length) = 0;
+		virtual void sendMessageToClient(SOCKET clientSocket, const char* message, int length) = 0;
+		virtual void broadcastMessageToClients(SOCKET sendingClientSocket, const char* message, int length) = 0;
+		
+	public:
+		TcpListener(const char* serverIpAdress, const char* serverPort):serverIpAdress(serverIpAdress), serverPort(serverPort){
+			this->serverListeningSocket = INVALID_SOCKET;
+			FD_ZERO(&this->master_fd);
+			//TODO: initialize this->wsaData
+		}
 
-protected:
+		int init(); // Initialize the listener
+		int run(); // Run the listener
+		virtual int shutdown(); // shut down the server
 
-	//	Handelor for client connections
-	virtual void onClientConected(int clientSocket);
+		SOCKET getServerListeningPort() { return this->serverListeningSocket; }
+		fd_set getMasterFd() { return this->master_fd; }
 
-	//	Handelor for client disconnections
-	virtual void onClientDisconected(int clientSocket);
-
-
-	//	Handler for when a message is received from the client
-	virtual void onMessageReceived(int clientSocket, const char* msg, int length);
-
-	//	send a message to client
-	void sendToClient(int clientSocket, const char* msg, int length);
-
-	//Broadcast message from a client
-	void broadcastToClients(int sendingClient, const char* msg, int length);
-
-private:
-	const char*		m_ipAdress; // IP adress server will run on
-	int				m_port;		// port number for web service
-	int				m_socket;	// internal socket file descriptor for the listening socket
-	fd_set			m_master;   // master file descriptor set
 };

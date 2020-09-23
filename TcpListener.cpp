@@ -1,184 +1,171 @@
 #include "TcpListener.h"
-#include <iostream>
-#include <string>
-#include <sstream>
 
 int TcpListener::init() {
 
-	// Initialze winsock
-	WSADATA wsData;
-	WORD ver = MAKEWORD(2, 2);
+	// Initialize Winsock
+	int iResult = WSAStartup(MAKEWORD(2, 2), &this->wsaData);
+	if (iResult != 0) {
+		cerr << "WSAStartup failed: " << iResult << NEWLINE;
+		return 1;
+	}
 
-	int wsOk = WSAStartup(ver, &wsData);
-	if (wsOk != 0) 
-		return wsOk;
+	// server part
+	struct addrinfo* result = nullptr, hints{}; // hints{} means an empty initialization for hints
 
-	// Create a socket
-	m_socket = socket(AF_INET, SOCK_STREAM, 0);
-	if (m_socket == INVALID_SOCKET) 
-		return WSAGetLastError();
+	ZeroMemory(&hints, sizeof(hints));
+	hints.ai_family = AF_INET;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_protocol = IPPROTO_TCP;
+	hints.ai_flags = AI_PASSIVE;
 
-	// Bind the ip address and port to a socket
-	sockaddr_in hint;
-	hint.sin_family = AF_INET;
-	hint.sin_port = htons(m_port);
-	inet_pton(AF_INET, m_ipAdress, &hint.sin_addr);
+	// Resolve the local address and port to be used by the server
+	iResult = getaddrinfo(nullptr, this->serverPort, &hints, &result);
+	if (iResult != 0) {
+		cerr << "getaddrinfo failed: " << iResult << NEWLINE;
+		WSACleanup();
+		return 1;
+	}
 
-	if (bind(m_socket, (sockaddr*)&hint, sizeof(hint)) == SOCKET_ERROR)
-		return WSAGetLastError();
 
-	// Tell Winsock the socket is for listening 
-	if (listen(m_socket, SOMAXCONN) == SOCKET_ERROR)
-		return WSAGetLastError();
-	
-	// Create the master file descriptor set and zero it
-	FD_ZERO(&m_master);
+	// Create a SOCKET for the server to listen for client connections
+	this->serverListeningSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (this->serverListeningSocket == INVALID_SOCKET) {
+		cerr << "Error when creating the socket" << NEWLINE << WSAGetLastError();
+		WSACleanup();
+		return 1;
+	}
+
+	// Setup the TCP listening socket (bind the ip address and port to a socket)
+	iResult = bind(this->serverListeningSocket, result->ai_addr, (int)result->ai_addrlen);
+	if (iResult == SOCKET_ERROR) {
+		cerr << "bind failed with error: " << WSAGetLastError() << NEWLINE;
+		freeaddrinfo(result);
+		closesocket(this->serverListeningSocket);
+		WSACleanup();
+		return 1;
+	}
+
+
+	/* Once the bind function is called, the address information returned by the getaddrinfo function is no longer needed.
+	* The freeaddrinfo function is called to free the memory allocated by the getaddrinfo function for this address
+	* information. */
+	freeaddrinfo(result);
+
+
+	// Tell Winsock the socket is for listening
+	if (listen(this->serverListeningSocket, SOMAXCONN) == SOCKET_ERROR) {
+		cerr << "Listen failed with error: " << WSAGetLastError() << NEWLINE;
+		closesocket(this->serverListeningSocket);
+		WSACleanup();
+		return 1;
+	}
+
+	// Set zero to master file descriptor (done in constructor)
+	//FD_ZERO(&this->master_fd);
 
 	// Add our first socket that we're interested in interacting with; the listening socket!
 	// It's important that this socket is added for our server or else we won't 'hear' incoming
-	// connections 
-	FD_SET(m_socket, &m_master);
+	// connections
+	FD_SET(this->serverListeningSocket, &this->master_fd);
 
+	cout << "---------------------------------------" << NEWLINE;
+	cout << "Server is running. Waiting connections." << NEWLINE;
+	cout << "---------------------------------------" << NEWLINE;
+	
 	return 0;
-
 }
 
 int TcpListener::run() {
 
-	// this will be changed by the \quit command (see below, bonus not in video!)
-	bool running = true;
-
-	while (running)
-	{
+	while (this->serverIsRunning) {
 		// Make a copy of the master file descriptor set, this is SUPER important because
 		// the call to select() is _DESTRUCTIVE_. The copy only contains the sockets that
-		// are accepting inbound connection requests OR messages. 
+		// are accepting inbound connection requests OR messages.
 
 		// E.g. You have a server and it's master file descriptor set contains 5 items;
-		// the listening socket and four clients. When you pass this set into select(), 
+		// the listening socket and four clients. When you pass this set into select(),
 		// only the sockets that are interacting with the server are returned. Let's say
 		// only one client is sending a message at that time. The contents of 'copy' will
 		// be one socket. You will have LOST all the other sockets.
 
 		// SO MAKE A COPY OF THE MASTER LIST TO PASS INTO select() !!!
 
-		fd_set copy = m_master;
+		fd_set copy = this->master_fd;
 
 		// See who's talking to us
 		int socketCount = select(0, &copy, nullptr, nullptr, nullptr);
 
 		// Loop through all the current connections / potential connect
-		for (int i = 0; i < socketCount; i++)
-		{
-			// Makes things easy for us doing this assignment
-			SOCKET sock = copy.fd_array[i];
+		for (int i = 0; i < socketCount; i++) {
 
-			// Is it an inbound communication?
-			if (sock == m_socket)
-			{
+			// Makes things easy for us doing this assignment
+			SOCKET currentInputSocket = copy.fd_array[i];
+
+			// Is it an inbound communication ( a new client is connected to server )
+			if (currentInputSocket == this->serverListeningSocket) {
+
 				// Accept a new connection
-				SOCKET client = accept(m_socket, nullptr, nullptr);
+				SOCKET clientSocket = accept(this->serverListeningSocket, nullptr, nullptr);
+				if (clientSocket == INVALID_SOCKET) {
+					cerr << "Accept failed: " << WSAGetLastError() << NEWLINE;
+					closesocket(this->serverListeningSocket);
+					WSACleanup();
+					return 1;
+				}
 
 				// Add the new connection to the list of connected clients
-				FD_SET(client, &m_master);
+				FD_SET(clientSocket, &this->master_fd);
 
-				onClientConected(client);
-				
+				onClientConected(clientSocket);
 			}
-			else // It's an inbound message
-			{
-				char buf[4096];
-				ZeroMemory(buf, 4096);
+			else { // It's an inbound message ( a client sent a message )
+
+				#define BUF_LEN 4096
+				char buf[BUF_LEN];
+				ZeroMemory(buf, BUF_LEN);
 
 				// Receive message
-				int bytesIn = recv(sock, buf, 4096, 0);
-				if (bytesIn <= 0)
-				{
+				int bytesIn = recv(currentInputSocket, buf, BUF_LEN, 0);
+				if (bytesIn <= 0) {
 					// Drop the client
-					onClientDisconected(sock);
-					closesocket(sock);
-					FD_CLR(sock, &m_master);
+					onClientDisconected(currentInputSocket);
+					closesocket(currentInputSocket);
+					FD_CLR(currentInputSocket, &this->master_fd);
 				}
-				else
-				{
-					onMessageReceived(sock, buf, bytesIn);
-					/*
-					// Check to see if it's a command. \quit kills the server
-					if (buf[0] == '\\')
-					{
-						// Is the command quit? 
-						string cmd = string(buf, bytesIn);
-						if (cmd == "\\quit")
-						{
-							running = false;
-							break;
-						}
+				else {
 
-						// Unknown command
-						continue;
-					}
-					*/
-
-					// Send message to other clients, and definiately NOT the listening socket
-
-				
+					onMessageReceived(currentInputSocket, buf, bytesIn);
 				}
 			}
 		}
 	}
 
+	//Shut down the server and close all active connections
+	return this->shutdown();
+
+}
+
+int TcpListener::shutdown() {
+
 	// Remove the listening socket from the master file descriptor set and close it
 	// to prevent anyone else trying to connect.
-	FD_CLR(m_socket, &m_master);
-	closesocket(m_socket);
+	FD_CLR(this->serverListeningSocket, &this->master_fd);
+	closesocket(this->serverListeningSocket);
 
-	// Message to let users know what's happening.
-	//string msg = "Server is shutting down. Goodbye\r\n";
-
-	while (m_master.fd_count > 0)
-	{
+	while (this->master_fd.fd_count > 0) {
 		// Get the socket number
-		SOCKET sock = m_master.fd_array[0];
-
-		// Send the goodbye message
-		//send(sock, msg.c_str(), msg.size() + 1, 0);
+		SOCKET currentSocket = this->master_fd.fd_array[0];
 
 		// Remove it from the master file list and close the socket
-		FD_CLR(sock, &m_master);
-		closesocket(sock);
+		FD_CLR(currentSocket, &this->master_fd);
+		closesocket(currentSocket);
 	}
 
-	// Cleanup winsock
 	WSACleanup();
+
+	system("pause");
 
 	return 0;
 
 }
 
-void TcpListener::sendToClient(int clientSocket, const char* msg, int length) {
-	send(clientSocket, msg, length, 0);
-}
-
-void TcpListener::broadcastToClients(int sendingClient, const char* msg, int length) {
-	for (int i = 0; i < m_master.fd_count; i++)
-	{
-		SOCKET outSock = m_master.fd_array[i];
-		if (outSock != m_socket && outSock != sendingClient)
-		{
-			sendToClient(outSock, msg, length);
-		}
-	}
-}
-
-
-void TcpListener::onClientConected(int clientSocket) {
-
-}
-
-void TcpListener::onClientDisconected(int clientSocket) {
-
-}
-
-void TcpListener::onMessageReceived(int clientSocket, const char* msg, int length) {
-
-}

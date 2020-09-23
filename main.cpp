@@ -1,18 +1,19 @@
-//#include "MultiClientChat.h"
-#include "WebServer.h"
+#include "MultiClientChat.h"
+//#include "WebServer.h"
 
-using namespace std;
-
-void main()
-{
+int main(){
 	
-	//MultiClientChat X("0.0.0.0", 54010);
-	WebServer X("0.0.0.0", 8080);
+    //MultiClientChat X(SERVER_ADDRESS, SERVER_PORT);
+	//WebServer X(SERVER_ADDRESS, SERVER_PORT);
+
+	MultiClientChat X(SERVER_ADDRESS, "54000");
+	//WebServer X(SERVER_ADDRESS, "8080");
 	if (X.init() != 0)
-		return;
+		return 0;
 
 	X.run();
 	
-
 	system("pause");
+
+	return 0;
 }
