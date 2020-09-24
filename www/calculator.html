@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Calculator</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/functions.js"></script>
+</head>
+
+<body>
+    
+    <section>
+
+        <div class="anchor-class">
+            <a href="index.html">Go back to index page</a>
+        </div>
+
+        <h1>Calculator</h1>
+
+        <div id="display">
+            <span id="input_1"></span>
+            <br>
+            <span id="input_2"></span>
+            <br>
+        </div>
+
+        <div id="mainDiv">
+
+                <div class="buttons">
+                    <button type="button" class="operators" onclick="setMessage()">CE</button>
+                    <button type="button" class="operators" onclick="setRestart()">C</button>
+                    <button type="button" class="operators" onclick="setDelete()">B</button>
+                    <button type="button" class="operators" onclick="setDiv()">/</button>
+                    <br>
+                </div>
+                
+                <div class="buttons">
+                    <button type="button" class="numbers" onclick="setSeven()">7</button>
+                    <button type="button" class="numbers" onclick="setEight()">8</button>
+                    <button type="button" class="numbers" onclick="setNine()">9</button>
+                    <button type="button" class="operators" onclick="setMultiply()">*</button>
+                    <br>
+                </div>
+
+                <div class="buttons">
+                    <button type="button" class="numbers" onclick="setFour()">4</button>
+                    <button type="button" class="numbers" onclick="setFive()">5</button>
+                    <button type="button" class="numbers" onclick="setSix()">6</button>
+                    <button type="button" class="operators" onclick="setMinus()">-</button>
+                    <br>
+                </div>
+                
+                <div class="buttons">
+                    <button type="button" class="numbers" onclick="setOne()">1</button>
+                    <button type="button" class="numbers" onclick="setTwo()">2</button>
+                    <button type="button" class="numbers" onclick="setThree()">3</button>
+                    <button type="button" class="operators" onclick="setPlus()">+</button>
+                    <br>
+                </div>
+                
+                <div class="buttons">
+                    <button type="button" class="operators" onclick="setSign()">+/-</button>
+                    <button type="button" class="numbers" onclick="setZero()">0</button>
+                    <button type="button" class="operators" onclick="setDot()">.</button>
+                    <button type="button" class="operators" onclick="setEqual()">=</button>
+                    <br>
+                </div>
+              
+        </div>
+
+    </section>
+
+</body>
+
+</html>

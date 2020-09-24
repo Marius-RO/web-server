@@ -1,0 +1,84 @@
+body{
+    background-color: antiquewhite;
+}
+
+h2, .anchor-class{
+    font-family: 'Courier New', Courier, monospace;
+    text-align: center;
+}
+
+a{
+    font-size: 200%;
+    color: darkred;
+
+}
+
+#calculator{
+    font-weight: bold;
+}
+
+h1{
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 200%;
+    text-align: center;
+}
+
+#display{
+
+    border: black;
+    border-style: solid;
+    width: 19%;
+    display: block;
+    background-color: white;
+    margin: auto;
+    text-align: right;
+    
+}
+
+#input_1{
+
+    width: 98%;
+    font-size: 80%;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+
+}
+
+#input_2{
+
+    width: 98%;
+    font-size: 160%;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+
+}
+
+.buttons{
+    width: 100%;
+    margin:auto;
+}
+
+.operators{
+    width: 23%;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: rgb(168, 219, 168);
+    font-weight: bold;
+}
+
+.numbers{
+    width: 23%;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    background-color: rgb(101, 168, 129);
+    font-weight: bold;
+}
+
+#mainDiv{
+    width: 20%;
+    display: block;
+    margin-left: 40.28%;
+}
+
+.CE{
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 100%;
+    padding-right: 60px;
+    color: brown;
+}

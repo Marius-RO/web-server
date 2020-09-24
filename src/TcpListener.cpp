@@ -1,4 +1,4 @@
-#include "TcpListener.h"
+#include "headers/TcpListener.h"
 
 int TcpListener::init() {
 
@@ -116,7 +116,7 @@ int TcpListener::run() {
 				// Add the new connection to the list of connected clients
 				FD_SET(clientSocket, &this->master_fd);
 
-				onClientConected(clientSocket);
+                onClientConnected(clientSocket);
 			}
 			else { // It's an inbound message ( a client sent a message )
 
@@ -128,7 +128,7 @@ int TcpListener::run() {
 				int bytesIn = recv(currentInputSocket, buf, BUF_LEN, 0);
 				if (bytesIn <= 0) {
 					// Drop the client
-					onClientDisconected(currentInputSocket);
+                    onClientDisconnected(currentInputSocket);
 					closesocket(currentInputSocket);
 					FD_CLR(currentInputSocket, &this->master_fd);
 				}
