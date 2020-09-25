@@ -5,7 +5,7 @@
 #include <iterator>
 #include <vector>
 #include <regex>
-#include "headers/WebServer.h"
+#include "../headers/WebServer.h"
 
 void WebServer::onClientConnected(SOCKET clientSocket) {
     cout << "Client #" << clientSocket << " connected" << NEWLINE;
