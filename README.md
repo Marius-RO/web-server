@@ -1,17 +1,16 @@
 # web-server
 
-### Compilation
+## Starting code
 
-Must be compiled with **Microsoft Visual C++ compiler** and works only for Windows.
+Check this commit for more info **https://github.com/Marius-RO/web-server/commit/f4333fce8417dd2ba9cdad813bacc901e39a77f9**
 
-### Starting code:
+## Project info
 
-The starting code added in the third commit **https://github.com/Marius-RO/web-server/commit/f4333fce8417dd2ba9cdad813bacc901e39a77f9 (added starting code)** was created based on these sources:
-- https://www.youtube.com/watch?v=Kc1kwm1WyVM&t=00s&ab_channel=SloanKelly
-- https://docs.microsoft.com/en-us/windows/win32/winsock/initializing-winsock
+This project simulates a web server where **html/css/js** files hosted on **www** folder can be accessed via the browser on **localhost:8080**. For an easy to use in the current **www** folder is a simple calculator application that can be used to test if the server runs correctly.
 
-### Project Info
+After you compile (the project was created using **Microsoft Visual C++ compiler**) and run this project you should open a browser and go to **localhost:8080** and do like in the below image to test the server.
 
-This project simulates a web server where **html** files hosted on **www** folder can be accessed via the browser on **localhost:8080**.
-
+<p align="center">
+  <img src="https://github.com/Marius-RO/web-server/blob/master/img/demo.gif" width="750" title="demo-gif">
+</p>
 

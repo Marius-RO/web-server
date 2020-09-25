@@ -2,14 +2,14 @@
 
 int main(){
 
-	WebServer webServer(SERVER_ADDRESS, SERVER_PORT);
+    WebServer webServer(SERVER_ADDRESS, SERVER_PORT);
 
-	if (webServer.init() != 0)
-		return -1;
+    if (webServer.init() != 0)
+        return -1;
 
     webServer.run();
 
-	system("pause");
+    system("pause");
 
-	return 0;
+    return 0;
 }
